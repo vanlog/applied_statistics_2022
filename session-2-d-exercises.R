@@ -1,0 +1,20 @@
+# install.packages("nycflights13")
+library(nycflights13)
+
+nycflights13::airlines
+nycflights13::airports
+nycflights13::planes
+nycflights13::weather
+nycflights13::flights
+
+
+# Exercise 1: calculate the average arr_delay  
+# grouped by airline ('carrier') which are the top_5 
+# airlines as a matter of late
+
+# Exercise 2: which is the most problematic 
+# route (combination of "origin" and "dest")
+# as a matter of arrival late?
+
+
+
