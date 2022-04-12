@@ -1,11 +1,11 @@
 # install.packages("nycflights13")
 library(nycflights13)
 
-nycflights13::airlines
-nycflights13::airports
-nycflights13::planes
-nycflights13::weather
-nycflights13::flights
+airlines
+airports
+planes
+weather
+flights
 
 
 # Exercise 1: calculate the average arr_delay  

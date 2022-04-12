@@ -25,28 +25,29 @@ flights
 ## Exercise 1: 
 
 Calculate the average arr_delay grouped by airline ('carrier'). What are the top_5 
-airlines as a matter of late.
+airlines as a matter of late?
+
+First simple solution:
+
+```{r}
+flights %>% 
+  select(carrier, arr_delay) %>% 
+  group_by(carrier) %>% 
+  summarise(avg_delay = mean(arr_delay, na.rm=TRUE)) %>% 
+  top_n(5, avg_delay)
+```
+
+Solution with carrier full names:
 
 ```{r}
 flights %>% 
   select(carrier, arr_delay) %>% 
   left_join(airlines, by = "carrier") %>% 
-  group_by(name) %>% 
+  group_by(name, carrier) %>%
   summarise(avg_delay = mean(arr_delay, na.rm=TRUE)) %>% 
+  ungroup() %>% 
   top_n(5, avg_delay)
 ```
-
-## Non Availables values
-
-```{r}
-tibble(
-  value = c(0, 1, NA, 3)
-) %>% 
-  summarise(
-    avg_value = mean(value, na.rm=TRUE)
-  )
-```
-
 
 # Exercise 2
 
@@ -54,5 +55,34 @@ which is the most problematic route (combination of "origin" and "dest") as a ma
 
 ```{r}
 # try to use group_by with more than one variable
+flights_arr_delay_by_track <- flights %>% 
+  group_by(origin, dest) %>% 
+  summarise(avg_delay = mean(arr_delay, na.rm=TRUE))
+flights_arr_delay_by_track
+```
+
+
+With full names.
+
+Using the table of airports:
+
+```{r}
+airports_names <- airports %>% 
+  select(faa, name)
+airports_names
+```
+
+```{r}
+flights_origin_full_name <- flights_arr_delay_by_track %>% 
+  # join for the origin
+  left_join(airports_names, by = c("origin" = "faa")) %>% 
+  mutate(origin = name) %>% 
+  select(-name)
+
+flights_origin_full_name %>%
+  # join for the destination
+  left_join(airports_names, by = c("dest" = "faa")) %>% 
+  mutate(dest = name) %>% 
+  select(-name)
 ```
 
