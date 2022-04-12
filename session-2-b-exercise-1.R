@@ -65,3 +65,37 @@ ggplot(murders_in_south) +
   geom_vline(xintercept = murders_summary_usa$max_rate, colour = "blue") +
   ylim(NA, 10)
 
+# 5. summary of the North countries
+
+# 4. Exercise: calculate this summary for all regions
+murders_rate %>% 
+  group_by(region) %>% 
+  summarise(
+    min_rate = min(rate),
+    median_rate = median(rate),
+    average_rate = mean(rate),
+    max_rate = max(rate),
+    count = n()
+  ) %>% 
+  arrange(desc(median_rate))
+
+murders_summary_usa
+
+murders %>% 
+  arrange(desc(total))
+
+murders %>% 
+  top_n(5, total)
+
+murders_rate %>% 
+  top_n(5, rate)
+
+
+murders %>% 
+  count()
+
+# Page 93 (section 4.9) of the book
+install.packages("NHANES")
+library(NHANES)
+# use this data frame
+NHANES
