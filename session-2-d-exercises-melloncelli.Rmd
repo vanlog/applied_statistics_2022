@@ -1,0 +1,36 @@
+---
+title: "NYC Flights Exercises"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Dataset
+
+```{r}
+library(nycflights13)
+```
+
+Here the flights table
+
+```{r}
+flights
+```
+
+## Exercise 1: 
+
+calculate the average arr_delay grouped by airline ('carrier'). What are the top_5 
+airlines as a matter of late.
+
+# Exercise 2
+
+which is the most problematic route (combination of "origin" and "dest") as a matter of arrival late.
+
+```{r}
+# try to use group_by with more than one variable
+```
+
