@@ -1,0 +1,319 @@
+---
+title: "Describe a continuous variable"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(ggplot2)
+```
+
+# Dataset
+
+### Small dataset
+
+```{r dataset}
+class_student <- tribble(
+     ~Name, ~Height, ~Weigth,
+    "Jude",    172L,     75L,
+  "Philip",    180L,     87L,
+    "Carl",    187L,     81L,
+    "Anne",    168L,     64L,
+    "Rose",    173L,     56L,
+   "Peter",    175L,     78L,
+    "Mary",    161L,     51L
+  )
+
+class_student %>% 
+  arrange(Height)
+```
+
+
+Bigger Dataset:
+
+```{r}
+library(dslabs)
+data(heights)
+heights
+```
+
+
+# Summary metrics
+
+## Summary of the distribution of a single variable: Height
+
+```{r}
+summary(class_student$Height)
+```
+
+## Central tendency indexes
+
+### Median
+
+<!-- definition and examples taken from https://www.investopedia.com/terms/m/median.asp -->
+
+Median is the middle number in a sorted list of numbers. To determine the median value in a sequence of numbers, the numbers must first be sorted, or arranged, in value order from lowest to highest or highest to lowest.
+
+To find the median value in a list with an odd amount of numbers, one would find the number that is in the middle with an equal amount of numbers on either side of the median. To find the median, first arrange the numbers in order, usually from lowest to highest. 
+
+```{r}
+sort(class_student$Height)
+```
+
+```{r}
+median(class_student$Height)
+```
+
+To find the median value in a list with an even amount of numbers, one must determine the middle pair, add them, and divide by two. Again, arrange the numbers in order from lowest to highest.
+
+For example, in a data set of 
+
+```{r}
+vector <- c(3, 13, 2, 34, 11, 17, 27, 47)
+vector
+```
+
+the sorted order becomes:
+
+```{r}
+sort(vector)
+```
+
+
+The median is the average of the two numbers in the middle {2, 3, 11, **13, 17**, 26 34, 47}, which in this case is fifteen.
+
+```{r}
+(13 + 17) / 2
+```
+
+The R function `median`:
+
+```{r}
+median(vector)
+```
+
+## Quartiles
+
+With the median we sorted the value set and then we split it in two parts, the number that was in the middle was the median. Using quartiles we do the same but split the value set in four parts:
+
+```{r}
+summary(class_student$Height)[c("1st Qu.", "Median", "3rd Qu.")]
+```
+
+Remarks:
+
+- 1/4 (25%) of the entries has a Height below the "1st Qu." value
+- 2/4 (50%) of the entries has a Height below the "2nd Qu." value (which is the median by definition)
+- 3/4 (75%) of the entries has a Height below the "3rd Qu." value
+
+
+## Percentiles
+
+In the same way we can split the value set in 100 parts to get the percentiles. For example the 25th percentile is the 1st Quartile, and the 75th one is the 3rd Quartile:
+
+```{r}
+quantile(class_student$Height, probs = c(0.25, 0.75))
+```
+
+## Variability indexes
+
+### Range
+
+The Range is the distance between the minimum and the maximum value:
+
+```{r}
+diff(range(class_student$Height))
+```
+
+### Inter quartile range
+
+The Inter-quartile range is the difference between the 3rd Qu. and the 1st Qu. values.
+
+```{r}
+IQR(class_student$Height)
+```
+
+
+## Mean or average
+
+$$
+mean(x) = { \sum x_i \over count(x) } 
+$$
+
+
+```{r}
+mean(class_student$Height)
+```
+The variability index usually used with the mean is the standard deviation
+
+$$
+\mbox{sd}_N = {\sqrt {{\frac {1}{N-1}}\sum _{i=1}^{N}\left(x_{i}-{\bar {x}}\right)^{2}}}
+$$
+
+```{r}
+x <- class_student$Height
+sqrt(sum(abs((x-mean(x))^2))/(length(x)-1))
+```
+
+
+
+```{r}
+sd(class_student$Height)
+```
+
+
+```{r}
+ggplot(class_student) +
+  aes(x = Height) +
+  geom_histogram(bins = 4, color = "black", fill = "darkgreen")
+```
+
+
+
+```{r}
+bin_v = seq(160, 200, by=10)
+bin_v
+pl <- ggplot(class_student) +
+  aes(x = Height) +
+  geom_histogram(color = "black", fill = "darkgreen", breaks = bin_v)
+pl
+```
+
+```{r}
+height_metric <- class_student %>% 
+  summarise(
+    min = min(Height),
+    q25 = quantile(Height, probs = 0.25),
+    median = quantile(Height, probs = 0.50),
+    q75 = quantile(Height, probs = 0.75),
+    max = max(Height)
+  )
+height_metric
+```
+
+```{r include=FALSE}
+# set up a color palette
+library(RColorBrewer)  # colors
+colors <- as.list(brewer.pal(n = 8, name = 'Dark2'))
+objects <- c(
+  "min",
+  "q05",
+  "q25",
+  "median",
+  "q75",
+  "q95",
+  "max",
+  "bins"
+)
+names(colors) <- objects
+```
+
+
+# Distribution shape
+
+## Histogram
+
+### Histogram with metrics
+
+```{r}
+v_line_size = 1.2
+pl + 
+  geom_vline(xintercept = height_metric$min, colour = colors$min, size = v_line_size) +
+  geom_label(aes(x = height_metric$min, y = 4, label = "min")) +
+  geom_vline(xintercept = height_metric$q25, colour = colors$q25, size = v_line_size) +
+  geom_label(aes(x = height_metric$q25, y = 4, label = "q25")) +
+  geom_vline(xintercept = height_metric$median, colour = colors$median, size = v_line_size) +
+  geom_label(aes(x = height_metric$median, y = 4, label = "q50")) +
+  geom_vline(xintercept = height_metric$q75, colour = colors$q75, size = v_line_size) +
+  geom_label(aes(x = height_metric$q75, y = 4, label = "q75")) +
+  geom_vline(xintercept = height_metric$max, colour = colors$max, size = v_line_size) +
+  geom_label(aes(x = height_metric$max, y = 4, label = "max"))
+```
+
+### Histogram on a bigger dataset
+
+
+```{r}
+pl <- ggplot(heights) +
+  aes(x = height) +
+  geom_histogram(color = "black", fill = "darkgreen")
+pl
+```
+
+## Density and density histogram
+
+```{r}
+pl <- ggplot(heights) +
+  aes(x = height, y = ..density..) +
+  geom_histogram(color = "black", fill = "darkgreen") + 
+  geom_density(adjust = 1, color = "red", size = 2)
+pl
+```
+
+
+
+## Box plot
+
+```{r}
+ggplot(class_student) +
+  aes(x = Height) +
+  geom_boxplot() 
+```
+
+
+Boxplot explained:
+
+```{r}
+v_line_size = 0.3
+ggplot(class_student) +
+  aes(x = Height) +
+  geom_vline(xintercept = height_metric$min, colour = colors$min, size = v_line_size) +
+  geom_label(aes(x = height_metric$min, y = 1, label = "min")) +
+  geom_vline(xintercept = height_metric$q25, colour = colors$q25, size = v_line_size) +
+  geom_label(aes(x = height_metric$q25, y = 1, label = "q25")) +
+  geom_vline(xintercept = height_metric$median, colour = colors$median, size = v_line_size) +
+  geom_label(aes(x = height_metric$median, y = 1, label = "q50")) +
+  geom_vline(xintercept = height_metric$q75, colour = colors$q75, size = v_line_size) +
+  geom_label(aes(x = height_metric$q75, y = 1, label = "q75")) +
+  geom_vline(xintercept = height_metric$max, colour = colors$max, size = v_line_size) +
+  geom_label(aes(x = height_metric$max, y = 1, label = "max")) +
+  geom_boxplot() 
+```
+
+### Outliers
+
+Let us use the bigger dataset: it contains outliers.
+
+```{r}
+heights
+```
+
+
+```{r}
+heights %>% 
+  ggplot() +
+  aes(x = height) + 
+  geom_boxplot() +
+  stat_summary(fun=mean, geom="point", shape=20, size=4, color="red", fill="red")
+```
+
+
+
+Box plot split on a categorical variable:
+
+```{r}
+heights %>% 
+  ggplot() +
+  aes(x = sex, y = height) + 
+  geom_boxplot() +
+  stat_summary(fun=mean, geom="point", shape=20, size=4, color="red", fill="red")
+```
+
+
+
+```{r}
+heights
+```
+

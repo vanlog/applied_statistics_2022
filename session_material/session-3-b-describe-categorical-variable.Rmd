@@ -1,0 +1,109 @@
+---
+title: "03 descriptive statistitcs"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(ggplot2)
+```
+
+## Dataset
+
+```{r}
+class_student <- tribble(
+     ~Name, ~Gender, ~Grade, ~Age,
+    "Jude",     "M",    "A",  27L,
+  "Philip",     "M",    "B",  24L,
+    "Carl",     "M",    "A",  41L,
+    "Anne",     "F",    "A",  32L,
+    "Rose",     "F",    "B",  26L,
+   "Peter",     "M",    "C",  30L,
+    "Mary",     "F",    "A",  45L,
+"Michaela",     "F",    "B",  26L,
+  )
+```
+
+
+## Frequency table (categorical variable)
+
+The frequency table of a *categorical* variable is a tables with the following aggregations relating to the specified variable:
+
+- *Absolute frequency*: the number of times a specific level value occurs.
+
+- *relative frequency*: the absolute frequency normalized by the total number of records. 
+
+- *percentage*: the relative frequency multiplied by 100.
+
+- *cumulative absolute frequency*: the total of the *absolute* frequencies of all records at or below a certain point in an ordered list of events (Advice: use the function `cumsum` in R).
+
+- *cumulative relative frequency*: the total of the *relative* frequencies of all records at or below a certain point in an ordered list of events (Advice: use the function `cumsum` in R).
+
+- *cumulative percentage*  the cumulative frequency multiplied by 100.
+
+
+Remark: cumulative aggregation are meaningful if the variables level can be ordered.
+
+
+**Exercise**: write the frequency table of the `class_student$Grade` variable:
+
+```{r}
+
+```
+
+## Bar plot 
+
+Bar plot is a graphical visualization that has the levels of a categorical variable at the x-axis and a per-level aggregation on the y-axis (bin high).
+
+The default aggregation for the `geom_bar` function is the count:
+
+```{r}
+ggplot(class_student) +
+  aes(x = Grade) +
+  geom_bar(fill = "darkgreen")
+```
+
+In case you need a different aggregation you can calculate it yourself:
+
+```{r}
+tot = nrow(class_student)
+
+class_student %>%
+  group_by(Grade) %>% 
+  summarise(Percent = n()/tot, .groups = "drop") %>% 
+  ggplot() + 
+    aes(x = Grade, y = Percent) +
+    geom_bar(stat = "identity", fill = "darkgreen") +
+    scale_y_continuous(labels = scales::label_percent())
+
+```
+
+
+## Bivariate
+
+Two way contingency table:
+
+```{r}
+table(class_student$Gender, class_student$Grade, dnn = c("Gender", "Grade"))
+```
+
+
+Stacked barplot:
+
+```{r}
+ggplot(class_student) +
+  aes(x = Grade, fill = Gender) +
+  geom_bar(position = 'stack')
+```
+
+Dodge barplot:
+
+```{r}
+ggplot(class_student) +
+  aes(x = Grade, fill = Gender) +
+  geom_bar(position = 'dodge')
+```
+
+

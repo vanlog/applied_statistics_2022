@@ -1,0 +1,40 @@
+---
+title: "03-Data-visualization"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(dslabs)
+data(murders)
+```
+
+## Empty plot
+
+```{r}
+ggplot(data = murders)
+```
+
+
+## Cheat sheet
+
+
+```{r}
+ggplot(data = murders) +
+  geom_point(aes(population/10^6, total))
+```
+
+
+```{r}
+p <- ggplot(data = murders)
+```
+
+
+```{r}
+p + 
+  geom_point(aes(population/10^6, total)) +
+  geom_text(aes(population/10^6, total, label = abb))
+```
+
