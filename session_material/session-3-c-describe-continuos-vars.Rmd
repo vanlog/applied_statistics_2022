@@ -221,48 +221,9 @@ names(colors) <- objects
 
 # Distribution shape
 
-## Histogram
-
-### Histogram with metrics
-
-```{r}
-v_line_size = 1.2
-pl + 
-  geom_vline(xintercept = height_metric$min, colour = colors$min, size = v_line_size) +
-  geom_label(aes(x = height_metric$min, y = 4, label = "min")) +
-  geom_vline(xintercept = height_metric$q25, colour = colors$q25, size = v_line_size) +
-  geom_label(aes(x = height_metric$q25, y = 4, label = "q25")) +
-  geom_vline(xintercept = height_metric$median, colour = colors$median, size = v_line_size) +
-  geom_label(aes(x = height_metric$median, y = 4, label = "q50")) +
-  geom_vline(xintercept = height_metric$q75, colour = colors$q75, size = v_line_size) +
-  geom_label(aes(x = height_metric$q75, y = 4, label = "q75")) +
-  geom_vline(xintercept = height_metric$max, colour = colors$max, size = v_line_size) +
-  geom_label(aes(x = height_metric$max, y = 4, label = "max"))
-```
-
-### Histogram on a bigger dataset
-
-
-```{r}
-pl <- ggplot(heights) +
-  aes(x = height) +
-  geom_histogram(color = "black", fill = "darkgreen")
-pl
-```
-
-## Density and density histogram
-
-```{r}
-pl <- ggplot(heights) +
-  aes(x = height, y = ..density..) +
-  geom_histogram(color = "black", fill = "darkgreen") + 
-  geom_density(adjust = 1, color = "red", size = 2)
-pl
-```
-
-
-
 ## Box plot
+
+### Simple case (no outliers)
 
 ```{r}
 ggplot(class_student) +
@@ -271,7 +232,7 @@ ggplot(class_student) +
 ```
 
 
-Boxplot explained:
+### Boxplot explained
 
 ```{r}
 v_line_size = 0.3
@@ -304,10 +265,10 @@ heights %>%
   ggplot() +
   aes(x = height) + 
   geom_boxplot()
-  # stat_summary(fun=mean, geom="point", shape=20, size=4, color="red", fill="red")
 ```
 
 
+### Comparing two distribution
 
 Box plot split on a categorical variable:
 
@@ -323,5 +284,97 @@ heights %>%
 
 ```{r}
 heights
+```
+
+
+
+
+## Histogram
+
+### Histogram with metrics
+
+```{r}
+v_line_size = 1.2
+pl + 
+  geom_vline(xintercept = height_metric$min, colour = colors$min, size = v_line_size) +
+  geom_label(aes(x = height_metric$min, y = 4, label = "min")) +
+  geom_vline(xintercept = height_metric$q25, colour = colors$q25, size = v_line_size) +
+  geom_label(aes(x = height_metric$q25, y = 4, label = "q25")) +
+  geom_vline(xintercept = height_metric$median, colour = colors$median, size = v_line_size) +
+  geom_label(aes(x = height_metric$median, y = 4, label = "q50")) +
+  geom_vline(xintercept = height_metric$q75, colour = colors$q75, size = v_line_size) +
+  geom_label(aes(x = height_metric$q75, y = 4, label = "q75")) +
+  geom_vline(xintercept = height_metric$max, colour = colors$max, size = v_line_size) +
+  geom_label(aes(x = height_metric$max, y = 4, label = "max"))
+```
+
+### Histogram on a bigger dataset
+
+
+```{r}
+pl <- ggplot(heights) +
+  aes(x = height) +
+  geom_histogram(color = "black", fill = "darkgreen")
+pl
+```
+
+
+
+### Histogram explained
+
+```{r}
+v_line_size = 0.3
+label_y <- 200
+pl <- ggplot(heights) +
+  aes(x = height) +
+  geom_vline(xintercept = height_metric_2$min, colour = colors$min, size = v_line_size) +
+  geom_label(aes(x = height_metric_2$min, y = label_y, label = "min")) +
+  geom_vline(xintercept = height_metric_2$q25, colour = colors$q25, size = v_line_size) +
+  geom_label(aes(x = height_metric_2$q25, y = label_y, label = "q25")) +
+  geom_vline(xintercept = height_metric_2$median, colour = colors$median, size = v_line_size) +
+  geom_label(aes(x = height_metric_2$median, y = label_y, label = "q50")) +
+  geom_vline(xintercept = height_metric_2$q75, colour = colors$q75, size = v_line_size) +
+  geom_label(aes(x = height_metric_2$q75, y = label_y, label = "q75")) +
+  geom_vline(xintercept = height_metric_2$max, colour = colors$max, size = v_line_size) +
+  geom_label(aes(x = height_metric_2$max, y = label_y, label = "max"))
+
+# slow operation
+pl +
+  geom_histogram() 
+
+```
+
+
+
+## Density plot and density histogram
+
+### Density histogram
+
+
+```{r}
+pl <- ggplot(heights) +
+  aes(x = height, y = ..density..) +
+  geom_histogram(color = "black", fill = "darkgreen")
+pl
+```
+
+### Density plot
+
+
+```{r}
+pl <- ggplot(heights) +
+  aes(x = height, y = ..density..) +
+  geom_histogram(color = "black", fill = "darkgreen") + 
+  geom_density(adjust = 1, color = "red", size = 2)
+pl
+```
+
+### Comparing two distributions
+
+```{r}
+pl <- ggplot(heights) +
+  aes(x = height, y = ..density.., fill = sex, color = sex) +
+  geom_density(adjust = 1, alpha = 0.7)
+pl
 ```
 
