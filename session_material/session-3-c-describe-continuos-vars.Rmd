@@ -31,7 +31,7 @@ class_student %>%
 ```
 
 
-Bigger Dataset:
+### Bigger Dataset:
 
 ```{r}
 library(dslabs)
@@ -94,7 +94,9 @@ The R function `median`:
 median(vector)
 ```
 
-## Quartiles
+## Quantiles 
+
+### Quartiles
 
 With the median we sorted the value set and then we split it in two parts, the number that was in the middle was the median. Using quartiles we do the same but split the value set in four parts:
 
@@ -109,7 +111,7 @@ Remarks:
 - 3/4 (75%) of the entries has a Height below the "3rd Qu." value
 
 
-## Percentiles
+### Percentiles
 
 In the same way we can split the value set in 100 parts to get the percentiles. For example the 25th percentile is the 1st Quartile, and the 75th one is the 3rd Quartile:
 
@@ -138,6 +140,8 @@ IQR(class_student$Height)
 
 ## Mean or average
 
+### Mean (Central tendency index)
+
 $$
 mean(x) = { \sum x_i \over count(x) } 
 $$
@@ -146,6 +150,10 @@ $$
 ```{r}
 mean(class_student$Height)
 ```
+
+
+### Standar Deviation (Variability index)
+
 The variability index usually used with the mean is the standard deviation
 
 $$
@@ -295,8 +303,8 @@ heights
 heights %>% 
   ggplot() +
   aes(x = height) + 
-  geom_boxplot() +
-  stat_summary(fun=mean, geom="point", shape=20, size=4, color="red", fill="red")
+  geom_boxplot()
+  # stat_summary(fun=mean, geom="point", shape=20, size=4, color="red", fill="red")
 ```
 
 

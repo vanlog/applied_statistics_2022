@@ -1,5 +1,5 @@
 ---
-title: "03 descriptive statistitcs"
+title: "03 Describe a categorical variable"
 output: html_document
 ---
 
@@ -14,16 +14,16 @@ library(ggplot2)
 
 ```{r}
 class_student <- tribble(
-     ~Name, ~Gender, ~Grade, ~Age,
-    "Jude",     "M",    "A",  27L,
+  ~Name, ~Gender, ~Grade, ~Age,
+  "Jude",     "M",    "A",  27L,
   "Philip",     "M",    "B",  24L,
-    "Carl",     "M",    "A",  41L,
-    "Anne",     "F",    "A",  32L,
-    "Rose",     "F",    "B",  26L,
-   "Peter",     "M",    "C",  30L,
-    "Mary",     "F",    "A",  45L,
-"Michaela",     "F",    "B",  26L,
-  )
+  "Carl",     "M",    "A",  41L,
+  "Anne",     "F",    "A",  32L,
+  "Rose",     "F",    "B",  26L,
+  "Peter",     "M",    "C",  30L,
+  "Mary",     "F",    "A",  45L,
+  "Michaela",     "F",    "B",  26L,
+)
 ```
 
 
@@ -50,7 +50,22 @@ Remark: cumulative aggregation are meaningful if the variables level can be orde
 **Exercise**: write the frequency table of the `class_student$Grade` variable:
 
 ```{r}
+tot <- nrow(class_student)
 
+class_student %>%
+  group_by(
+    Grade
+  ) %>% 
+  summarise(
+    abs_freq = n(),
+    rel_freq = abs_freq / tot,
+    perc = rel_freq * 100
+  ) %>% 
+  mutate(
+    cum_abs_freq = cumsum(abs_freq),
+    cum_rel_freq = cumsum(rel_freq),
+    cum_perc = cumsum(perc)
+  )
 ```
 
 ## Bar plot 
@@ -68,16 +83,16 @@ ggplot(class_student) +
 In case you need a different aggregation you can calculate it yourself:
 
 ```{r}
-tot = nrow(class_student)
-
-class_student %>%
+class_student %>% 
   group_by(Grade) %>% 
-  summarise(Percent = n()/tot, .groups = "drop") %>% 
-  ggplot() + 
-    aes(x = Grade, y = Percent) +
-    geom_bar(stat = "identity", fill = "darkgreen") +
-    scale_y_continuous(labels = scales::label_percent())
-
+  summarise(
+    rel_freq = n()/tot
+  ) %>% 
+  ggplot() +
+  aes(x = Grade, y = rel_freq) +
+  geom_bar(stat = "identity", fill = "darkgreen") +
+  scale_y_continuous(labels = scales::label_percent()) +
+  ylab(label = "Percentage (%)")
 ```
 
 
