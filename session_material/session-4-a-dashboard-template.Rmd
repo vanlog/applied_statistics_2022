@@ -1,0 +1,73 @@
+---
+title: "NYC Flight analysis"
+output:
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    theme: 
+      version: 4
+      bootswatch: minty
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, rows.print=25)
+
+library(nycflights13)  # dataset
+library(tidyverse)
+library(plotly)        # Interactive 
+library(RColorBrewer)  # colors
+library(DT)            # nice view tables
+
+theme_set(theme_classic())
+
+# display.brewer.all(colorblindFriendly = TRUE)
+# display.brewer.pal(n = 8, name = 'Dark2')
+# View a single RColorBrewer palette by specifying its name
+colors <- as.list(brewer.pal(n = 8, name = 'Dark2'))
+objects <- c(
+  "min",
+  "q05",
+  "q25",
+  "median",
+  "q75",
+  "q95",
+  "max",
+  "bins"
+)
+names(colors) <- objects
+```
+
+
+
+# Delay Analysis
+
+## Col {.tabset .tabset-fade}
+   
+### Delay summary
+
+```{r}
+arr_delay_summary <- flights %>% 
+  summarise(
+    min = min(arr_delay, na.rm = TRUE),
+    q05 = quantile(arr_delay, probs = 0.05, na.rm = TRUE),
+    q25 = quantile(arr_delay, probs = 0.25, na.rm = TRUE),
+    median = quantile(arr_delay, probs = 0.50, na.rm = TRUE),
+    q75 = quantile(arr_delay, probs = 0.75, na.rm = TRUE),
+    q95 = quantile(arr_delay, probs = 0.95, na.rm = TRUE),
+    max = max(arr_delay, na.rm = TRUE)
+  )
+datatable(arr_delay_summary, rownames = FALSE)
+```
+
+## Col {.tabset .tabset-fade}
+
+
+
+### Timeseries
+
+
+```{r echo=FALSE}
+ggplot()
+```
+
+
+

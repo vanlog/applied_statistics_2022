@@ -256,6 +256,8 @@ ggplot(class_student) +
 Let us use the bigger dataset: it contains outliers.
 
 ```{r}
+library(dslabs)
+data(heights)
 heights
 ```
 
@@ -281,19 +283,15 @@ heights %>%
 ```
 
 
-
-```{r}
-heights
-```
-
-
-
-
 ## Histogram
 
 ### Histogram with metrics
 
 ```{r}
+pl <- ggplot(class_student) +
+  aes(x = Height) +
+  geom_histogram(color = "black", fill = "darkgreen", bins = 6)
+
 v_line_size = 1.2
 pl + 
   geom_vline(xintercept = height_metric$min, colour = colors$min, size = v_line_size) +
@@ -323,6 +321,15 @@ pl
 ### Histogram explained
 
 ```{r}
+height_metric_2 <- heights %>% 
+  summarise(
+    min = min(height),
+    q25 = quantile(height, probs = 0.25),
+    median = quantile(height, probs = 0.50),
+    q75 = quantile(height, probs = 0.75),
+    max = max(height)
+  )
+
 v_line_size = 0.3
 label_y <- 200
 pl <- ggplot(heights) +

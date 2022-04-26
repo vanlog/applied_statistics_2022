@@ -1,0 +1,142 @@
+---
+title: "session-3-b-visualization-exercises"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(NHANES)
+data(NHANES)
+```
+
+## Exercise
+
+Exercise at <https://rafalab.github.io/dsbook/tidyverse.html#exercises-11>
+
+## Dataset 
+
+```{r}
+?NHANES
+# glimpse(NHANES)
+NHANES
+```
+
+## Solution
+
+### 1.
+
+```{r}
+ref <- NHANES %>% 
+  filter(
+    AgeDecade == " 20-29",
+    Gender == "female"
+  ) %>% 
+  summarise(
+    mean = mean(BPSysAve, na.rm = T),
+    sd = sd(BPSysAve, na.rm = T),
+    na_count = sum(is.na(BPSysAve)),
+    total = n()
+  )
+ref
+```
+
+
+### 2. 
+
+```{r}
+ref_avg <- ref %>% 
+  pull(mean)
+ref_avg
+```
+
+
+### 3.
+
+```{r}
+NHANES %>% 
+  filter(
+    AgeDecade == " 20-29",
+    Gender == "female"
+  ) %>% 
+  summarise(
+    min = min(BPSysAve, na.rm = TRUE),
+    max = max(BPSysAve, na.rm = TRUE)
+  )
+
+
+```
+
+
+
+### 4.
+
+bla bla bla
+
+```{r}
+my_bpsys_analysis <- function(selected_gender) {
+  NHANES %>% 
+    filter(
+      Gender == selected_gender
+    ) %>% 
+    group_by(
+      AgeDecade,
+    ) %>% 
+    summarise(
+      mean = mean(BPSysAve, na.rm = T),
+      sd = sd(BPSysAve, na.rm = T)
+    )
+}
+my_bpsys_analysis("female")
+```
+
+### 5.
+
+```{r}
+my_bpsys_analysis("male")
+```
+
+
+### 6. 
+
+```{r}
+NHANES %>% 
+  group_by(
+    Gender,
+    AgeDecade,
+  ) %>% 
+  summarise(
+    mean = mean(BPSysAve, na.rm = T),
+    sd = sd(BPSysAve, na.rm = T),
+    .groups = "drop"
+  )
+
+```
+
+
+
+### 7.
+
+```{r}
+
+NHANES %>% 
+  filter(
+    AgeDecade == " 40-49",
+    Gender == "male"
+  ) %>% 
+  group_by(
+    Race1
+  ) %>% 
+  summarise(
+    min = min(BPSysAve, na.rm = TRUE),
+    mean = mean(BPSysAve, na.rm = T),
+    sd = sd(BPSysAve, na.rm = T),
+    max = max(BPSysAve, na.rm = TRUE)
+  ) %>% 
+  arrange(mean)
+
+```
+
+
+

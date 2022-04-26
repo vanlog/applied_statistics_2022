@@ -1,0 +1,178 @@
+---
+title: "NYC Flight analysis"
+output:
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    theme: 
+      version: 4
+      bootswatch: minty
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, rows.print=25)
+
+library(nycflights13)  # dataset
+library(tidyverse)
+library(plotly)        # Interactive 
+library(RColorBrewer)  # colors
+library(DT)            # nice view tables
+
+theme_set(theme_classic())
+
+# display.brewer.all(colorblindFriendly = TRUE)
+# display.brewer.pal(n = 8, name = 'Dark2')
+# View a single RColorBrewer palette by specifying its name
+colors <- as.list(brewer.pal(n = 8, name = 'Dark2'))
+objects <- c(
+  "min",
+  "q05",
+  "q25",
+  "median",
+  "q75",
+  "q95",
+  "max",
+  "bins"
+)
+names(colors) <- objects
+```
+
+
+
+# Delay Analysis
+
+## Col {.tabset .tabset-fade}
+   
+### Delay summary
+
+```{r}
+arr_delay_summary <- flights %>% 
+  summarise(
+    min = min(arr_delay, na.rm = TRUE),
+    q05 = quantile(arr_delay, probs = 0.05, na.rm = TRUE),
+    q25 = quantile(arr_delay, probs = 0.25, na.rm = TRUE),
+    median = quantile(arr_delay, probs = 0.50, na.rm = TRUE),
+    q75 = quantile(arr_delay, probs = 0.75, na.rm = TRUE),
+    q95 = quantile(arr_delay, probs = 0.95, na.rm = TRUE),
+    max = max(arr_delay, na.rm = TRUE)
+  )
+datatable(arr_delay_summary, rownames = FALSE)
+```
+
+### Delay histogram
+
+<!--
+create a histogram of the arrival delays using the table 'flights' and 200 bins.
+Then use ggplotly to make it interactive.
+-->
+
+```{r}
+v_line_size = 1.2
+label_height = 150000
+pl <- ggplot(flights) + 
+  aes(x = arr_delay) +
+  geom_histogram(fill = colors$bin, color = "black", bins = 200)
+ggplotly(pl)
+```
+
+
+### Delay Distribution
+
+<!--
+change the previous plot into a density histogram and add a density geometry layer
+-->
+
+```{r}
+pl <- ggplot(flights) + 
+  aes(x = arr_delay, y = ..density..) +
+  geom_density(fill = colors$bin, color = "black", alpha = 0.5) +
+  geom_histogram(fill = colors$bin, color = "black", bins = 200, alpha = 0.5)
+ggplotly(pl)
+```
+
+
+### Delay by airlines
+
+<!-- 
+create a boxplot of the 'arr_delay' separated by carrier. Reorder carrier by their median
+-->
+
+```{r}
+pl <- flights %>%
+  group_by(carrier) %>% 
+  mutate(arr_delay_median = median(arr_delay, na.rm = T)) %>% 
+  ggplot() + 
+  aes(x = reorder(carrier, arr_delay_median, na.rm = T), y = arr_delay) +
+  geom_boxplot()
+ggplotly(pl)
+```
+
+
+## Col {.tabset .tabset-fade}
+
+
+
+### Timeseries
+
+<!--
+Create the time series of the total arr_delay in a mount by carrier. Plot with line geometry ('geom_line')
+-->
+
+```{r eval=FALSE, include=FALSE}
+# Simple version (without lubridate)
+# arr_delay_ts <- flights %>% 
+#   group_by(year, month, carrier) %>% 
+#   summarise(arr_delay = sum(arr_delay, na.rm = TRUE))
+# ts_pl <- arr_delay_ts %>% 
+#   ggplot() +
+#   aes(x = month, y = arr_delay, color = carrier) +
+#   geom_line(stat = "identity", size = 1)
+# ggplotly(ts_pl)
+```
+
+
+```{r echo=FALSE}
+arr_delay_ts <- flights %>% 
+  unite(col = date, year, month, day) %>% 
+  mutate(date = lubridate::ymd(date)) %>% 
+  mutate(month = lubridate::ceiling_date(date, "month")) %>% 
+  group_by(month, carrier) %>% 
+  summarise(arr_delay = sum(arr_delay, na.rm = TRUE))
+ts_pl <- arr_delay_ts %>% 
+  ggplot() +
+  aes(x = month, y = arr_delay, color = carrier) +
+  geom_line(stat = "identity", size = 1)
+ggplotly(ts_pl)
+```
+
+
+
+
+### Flights per carrier
+
+<!--
+Create a barplot of the count of flights by carrier
+-->
+
+```{r}
+ggplot(flights) +
+  aes(x = carrier) + 
+  geom_bar(fill = colors$bins)
+```
+
+
+### Dep/arr relation
+
+<!--
+
+-->
+
+```{r}
+delay_scatter_plot <- 
+  flights %>% 
+  sample_frac(0.10) %>% 
+  ggplot() + 
+  aes(x = dep_delay, y = arr_delay) + 
+  geom_point(alpha = 0.10)
+delay_scatter_plot +
+  geom_smooth(se = FALSE, method = "lm", formula = y~x)
+```
