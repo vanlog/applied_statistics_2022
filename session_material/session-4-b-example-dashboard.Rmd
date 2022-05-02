@@ -163,7 +163,7 @@ ggplot(flights) +
 ### Dep/arr relation
 
 <!--
-
+Create a scatter plot to compare `dep_delay` and `arr_delay`. Draw a linear regression of the two.
 -->
 
 ```{r}
