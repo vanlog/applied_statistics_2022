@@ -371,8 +371,8 @@ pl
 ```{r}
 pl <- ggplot(heights) +
   aes(x = height, y = ..density..) +
-  geom_histogram(color = "black", fill = "darkgreen") + 
-  geom_density(adjust = 1, color = "red", size = 2)
+  geom_histogram(color = "black", fill = "darkgreen") +
+  geom_density(adjust = 1.0, color = "red", size = 2)
 pl
 ```
 

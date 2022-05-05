@@ -24,6 +24,7 @@ class_student <- tribble(
   "Mary",     "F",    "A",  45L,
   "Michaela",     "F",    "B",  26L,
 )
+class_student
 ```
 
 

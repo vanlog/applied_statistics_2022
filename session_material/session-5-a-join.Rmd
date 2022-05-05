@@ -1,0 +1,121 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## Combine multiple data frames
+
+
+### Joins
+
+Joins are a way to merge table based on the correspondence on a key.
+
+```{r}
+library(tidyverse)
+```
+
+Let us a couple of example tables. Let us define a [foreign-key](https://en.wikipedia.org/wiki/Foreign_key) a column whose values have a correspondence in another table. This creates a relationship among two tables.
+
+```{r}
+# Main table, where
+# 'id' id number
+# 'lower' a foreign key
+main_tbl <- tibble(
+  id = c(1:2, 3, 4:6), #1:5,
+  lower = c(letters[1:2], 'non-letter', letters[4:6])
+)
+main_tbl
+```
+
+
+And another that contains (usually all) the occurrences of the foreign-key:
+
+```{r}
+# The table of letters 
+# 'lower' list all the lower case letters
+# 'upper' an attribute to the letters, for the example case a upper case copy of the letter
+letter_tbl <- tibble(
+  lower = letters,
+  upper = LETTERS
+)
+letter_tbl
+```
+
+
+```{r}
+# full-join
+
+main_tbl %>% 
+  full_join(letter_tbl)
+```
+
+
+```{r}
+# inner-join
+
+main_tbl %>% 
+  inner_join(letter_tbl)
+```
+
+
+```{r}
+# left-join
+
+main_tbl %>% 
+  left_join(letter_tbl)
+```
+
+
+```{r}
+# right-join
+
+main_tbl %>% 
+  right_join(letter_tbl)
+
+# inverting the order a `right_join` return the same as a `left_join`
+letter_tbl %>% 
+  right_join(main_tbl)
+
+
+```
+
+
+
+### Split and Unite data frames
+
+#### Bind rows
+
+```{r}
+mtcar_list <- split(mtcars, as.character(mtcars$cyl))
+mtcars_cyl_6 <- mtcar_list[["6"]]
+mtcars_cyl_8 <- mtcar_list[["8"]]
+```
+
+
+
+These two data frames have the same schema, and their rows can be concatenated:
+
+```{r}
+bind_rows(mtcars_cyl_6, mtcars_cyl_8)
+```
+
+
+
+#### Bind columns
+
+```{r}
+mtcars_mpg_cyl <- select(mtcars, mpg, cyl)
+mtcars_disp_hp_drat <- select(mtcars, hp, drat, wt)
+```
+
+These two dataframes have the same number of rows, therefore their columns can be binded:
+
+```{r}
+bind_cols(mtcars_disp_hp_drat, mtcars_mpg_cyl)
+```
+
