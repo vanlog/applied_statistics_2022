@@ -1,5 +1,5 @@
 ---
-title: "Untitled"
+title: "Joins"
 output: html_document
 ---
 
@@ -85,6 +85,39 @@ letter_tbl %>%
 ```
 
 
+### Multiple entries
+
+```{r}
+main_tbl <- tibble(
+  id = c(1:2, 3, 4:9), #1:5,
+  lower = c(letters[1:2], 'non-letter', letters[4:6], letters[4:6])
+)
+main_tbl
+```
+
+```{r}
+main_tbl %>% 
+  left_join(letter_tbl)
+```
+
+Duplicate the rows in `letter_tbl`:
+
+```{r}
+letter_tbl_2 <- tibble(
+  lower = c(letters, "d"),
+  upper = c(LETTERS, "DD")
+)
+letter_tbl_2
+```
+
+
+```{r}
+main_tbl %>% 
+  left_join(letter_tbl_2)
+```
+
+
+
 
 ### Split and Unite data frames
 
@@ -104,18 +137,36 @@ These two data frames have the same schema, and their rows can be concatenated:
 bind_rows(mtcars_cyl_6, mtcars_cyl_8)
 ```
 
+Bind rows can work with a list of dataframe:
+
+```{r}
+df_list <- list(mtcars_cyl_6, mtcars_cyl_8)
+bind_rows(df_list)
+```
+
 
 
 #### Bind columns
 
 ```{r}
-mtcars_mpg_cyl <- select(mtcars, mpg, cyl)
+mtcars <- rownames_to_column(mtcars, var = "car_name")
+mtcars <- as_tibble(mtcars)
+mtcars_mpg_cyl <- mtcars %>% select(car_name, mpg, cyl)
 mtcars_disp_hp_drat <- select(mtcars, hp, drat, wt)
 ```
 
 These two dataframes have the same number of rows, therefore their columns can be binded:
 
 ```{r}
-bind_cols(mtcars_disp_hp_drat, mtcars_mpg_cyl)
+df <- bind_cols(mtcars_disp_hp_drat, mtcars_mpg_cyl)
+df
 ```
+
+Reorder columns:
+
+```{r}
+df %>% 
+  select(car_name, everything())
+```
+
 
