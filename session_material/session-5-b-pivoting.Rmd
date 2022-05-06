@@ -24,6 +24,7 @@ See also the [tidyr vignette](https://cran.r-project.org/web/packages/tidyr/vign
 
 ```{r}
 library(tidyverse) 
+# library(tidyr)
 library(dslabs)
 path <- system.file("extdata", package="dslabs")
 filename <- file.path(path, "fertility-two-countries-example.csv")
@@ -71,14 +72,11 @@ select(raw_dat, 1:5)
 
 
 ```{r}
-dat <- raw_dat %>% pivot_longer(-country)
+dat <- raw_dat %>% 
+  pivot_longer(-country)
 dat
 ```
 
-```{r}
-dat <- raw_dat %>% pivot_longer(-country)
-dat
-```
 
 ```{r}
 dat %>% separate(name, c("year", "name"), "_", extra = "merge")
@@ -95,15 +93,15 @@ dat %>%
 
 ```{r}
 var_names <- c("year", "first_variable_name", "second_variable_name")
-dat %>% 
+df <- dat %>% 
   separate(name, var_names, fill = "right")
+df
 ```
 
 
 ```{r}
-dat %>% 
-  separate(name, var_names, fill = "right") %>%
-  unite(name, first_variable_name, second_variable_name) %>%
+df %>%
+  unite(col = name, first_variable_name, second_variable_name, sep = "_") %>%
   pivot_wider() %>%
   rename(fertility = fertility_NA)
 ```
