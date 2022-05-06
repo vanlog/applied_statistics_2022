@@ -72,8 +72,6 @@ NHANES %>%
 
 ### 4.
 
-bla bla bla
-
 ```{r}
 my_bpsys_analysis <- function(selected_gender) {
   NHANES %>% 
