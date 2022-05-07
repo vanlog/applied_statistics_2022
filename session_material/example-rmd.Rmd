@@ -1,5 +1,5 @@
 ---
-title: "NYC Flight analysis"
+title: "Analysis"
 output:
   flexdashboard::flex_dashboard:
     orientation: columns
@@ -36,13 +36,11 @@ objects <- c(
 names(colors) <- objects
 ```
 
+# Delay analysis
 
+## Column 1 {.tabset .tabset-fade}
 
-# Delay Analysis
-
-## Col {.tabset .tabset-fade}
-   
-### Delay summary
+### Arrival Delay Statistics
 
 ```{r}
 arr_delay_summary <- flights %>% 
@@ -59,16 +57,24 @@ arr_delay_summary <- flights %>%
 datatable(arr_delay_summary, rownames = FALSE)
 ```
 
-## Col {.tabset .tabset-fade}
+### Airlines
 
-
-
-### Timeseries
-
-
-```{r echo=FALSE}
-ggplot()
+```{r}
+datatable(airlines, rownames = FALSE)
 ```
 
 
 
+## Column 2 {.tabset .tabset-fade}
+
+### Arrival Delay Distribution
+
+
+```{r echo=FALSE}
+library(plotly)
+
+pl <- ggplot(flights) +
+  aes(x = arr_delay) +
+  geom_histogram(bins = 200)
+ggplotly(pl)
+```

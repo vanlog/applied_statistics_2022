@@ -30,7 +30,7 @@ right <- mutate(scrambled, previous_year_value = lag(value, order_by = year))
 arrange(right, year)
 
 
-## Calculate a variation of temperature from the previous day
+## Exercise: Calculate a variation of temperature from the previous day
 weather %>% 
   select(origin, year:hour, temp)
 
