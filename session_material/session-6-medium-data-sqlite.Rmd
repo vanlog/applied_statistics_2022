@@ -1,0 +1,318 @@
+---
+title: "SQLite"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(DBI)
+library(RSQLite)
+library(dbplot)
+ontime_dir <- "~/data/ontime"
+flight_dir <- "~/data/ontime/flight"
+path <- "~/data/ontime"    # '.' is the current folder
+db <- "ontime.sqlite"
+path_db <- file.path(path, db)
+```
+
+
+## Resources
+
+- [R and Database documentation](https://db.rstudio.com/)
+- [Use dplyr with databases](https://db.rstudio.com/r-packages/dplyr/)
+- [Visualisation and databases](https://db.rstudio.com/best-practices/visualization/)
+- [RSQLite](https://github.com/r-dbi/RSQLite)
+- [SQLite browser](https://sqlitebrowser.org/dl/)
+- [dbplot vignette](https://rstudio-pubs-static.s3.amazonaws.com/314409_a8af4ecde2a34321a9b6a3a75143f5c8.html)
+
+## SQLite
+
+
+```{r}
+ontime_files <- list.files(ontime_dir, pattern = ".csv", full.names = TRUE)
+```
+
+
+### Delete the database file
+
+```{r}
+
+delete_db_if_exists <- function(path, db) {
+  db_exists <- list.files(path, pattern = db)
+  if(length(db_exists) != 0) system(paste("rm", path_db))
+}
+# delete_db_if_exists(path, db)
+
+# it create the db if it does not exists
+con <- dbConnect(RSQLite::SQLite(), path_db)
+
+# Encoding of the csv
+encoding <- "us-ascii"
+# list all the file with this extension with their full path
+files <- list.files(flight_dir, pattern = ".csv.bz2", full.names = TRUE)
+files
+```
+
+
+## Load data on SQLite
+
+```{r}
+# Try with 100 rows
+max_rows_to_be_read <- 100
+# When you are sure use them all, uncomment this line:
+max_rows_to_be_read <- Inf
+
+for (i in seq_along(files)) {
+  append <- ifelse(i == 1, FALSE, TRUE)  # first time create the table, then append to the existing one
+  overwrite <- ifelse(i != 1, FALSE, TRUE)
+  this_file <- files[i]                  # work on the i-th file
+  df <- read_delim(
+    file = this_file, 
+    delim = ",", 
+    locale = locale(encoding = encoding),
+    n_max = max_rows_to_be_read,
+    show_col_types = FALSE
+  )
+  dbWriteTable(conn = con, name = "ontime", value = df ,append = append, overwrite = overwrite)
+  cat(date() , this_file, "loaded", "\n")
+  rm(df)
+}
+```
+
+```{r}
+dbGetQuery(
+  con, "
+  SELECT * FROM ontime LIMIT 100
+  ")
+```
+
+
+
+```{r}
+dbDisconnect(con)
+```
+
+## Use database with dplyr
+
+### Lazy tables and lazy operations
+
+```{r}
+con_dplyr <- src_sqlite(path_db)
+ontime <- tbl(con_dplyr, "ontime")
+class(ontime)
+dim(ontime)
+```
+
+Remark: a number `NA` of rows means that `ontime` is a lazy table.
+
+
+```{r}
+ontime_stat <- ontime %>% 
+  group_by(Year, Month) %>%
+  summarise(
+    min = min(DepDelay, na.rm = TRUE), 
+    avg = mean(DepDelay, na.rm = TRUE), 
+    max = max(DepDelay, na.rm = TRUE),
+    .groups = "drop"
+  )
+```
+
+
+This operation has taken very little time. Because it is lazy. This means the real calculation happens when the result is requested:
+
+```{r}
+ontime_stat
+```
+
+
+Also the result of a dplyr operation is a lazy table:
+
+```{r}
+class(ontime_stat)
+```
+
+
+```{r}
+show_query(ontime_stat)
+```
+
+
+## Create plots with collected data
+
+### Collect a data frame
+
+```{r}
+ontime_dep_delay <- ontime %>%
+  select(year = Year, dep_delay = DepDelay, arr_delay = ArrDelay) %>%
+  # filter(dep_delay > 0) %>%
+  collect()
+```
+
+
+This time the `collect()` function call immediately the computation and the collection of the result in the R process as a data frame.
+
+```{r}
+ontime_dep_delay
+```
+
+
+```{r}
+class(ontime_dep_delay)
+```
+
+
+
+### Scatterplot with overplotting
+
+
+```{r}
+pl <- ontime_dep_delay %>% 
+  head(n=5000) %>% 
+  ggplot(aes(dep_delay, arr_delay)) + 
+  geom_point(
+    alpha=0.1
+  )
+```
+
+
+Also ggplot is lazy, the plot is created just before being visualized:
+
+```{r}
+pl
+```
+
+### GGplot raster
+
+```{r}
+pl <- ggplot(ontime_dep_delay , aes(dep_delay, arr_delay)) + 
+  geom_bin_2d(
+    bins = 20
+  ) 
+  # facet_wrap(~year, ncol = 2)
+pl
+```
+
+Note: in case you get a "Warning: Computation failed in `stat_binhex()`" run `install.packages("hexbin")`
+
+
+
+## Create plots with pre-aggregated data by the database
+
+### dbplot Raster quick function
+
+```{r}
+library(dbplot)
+
+ontime_dep_delay_lazy <- ontime %>%
+  select(
+    year = Year,
+    month = Month, 
+    dep_delay = DepDelay, 
+    arr_delay = ArrDelay, 
+    origin = Origin,
+    distance = Distance
+  )
+
+ontime_dep_delay_lazy %>%
+  filter(!is.na(dep_delay)) %>% 
+  dbplot_raster(dep_delay, arr_delay, resolution = 30)
+```
+
+
+### Raster with db_compute_raster()
+
+```{r}
+df <- ontime_dep_delay_lazy %>%
+  db_compute_raster(x = dep_delay, y = arr_delay) %>% 
+  collect() 
+
+df %>%
+  ggplot() +
+  geom_bin_2d(
+    mapping = aes(x = dep_delay, y = arr_delay, fill = `n()`),
+    stat = "identity"
+  )
+```
+
+
+### Raster with dplyr aggregation
+
+```{r}
+df <- ontime_dep_delay_lazy %>%
+  group_by(
+    dep_delay = !! db_bin(dep_delay, bins = 30),
+    arr_delay = !! db_bin(arr_delay, bins = 30),
+    year
+  ) %>%
+  summarise(avg_distance = mean(distance), .groups = "drop") %>%
+  collect() 
+
+
+df %>%
+  ggplot() +
+  geom_bin_2d(
+    mapping = aes(x = dep_delay, y = arr_delay, fill = avg_distance),
+    stat = "identity"
+  ) +
+  facet_wrap(~year, ncol = 2)
+```
+
+
+### Line plot
+
+```{r}
+ontime_dep_delay_lazy %>% 
+  mutate(year_num = year + month/12) %>% 
+  dbplot_line(year_num, mean(arr_delay)) +
+  labs(title = "Arrival delays by year")
+```
+
+
+### Bar plot
+
+```{r}
+dbplot_bar(ontime_dep_delay_lazy, as.character(year), mean(dep_delay)) +
+  labs(title = "Departure delays by year") +
+  theme_minimal() +
+  coord_flip()
+```
+
+
+
+### Histogram
+
+
+```{r}
+ontime_dep_delay_lazy <- ontime %>%
+  select(
+    year = Year, 
+    dep_delay = DepDelay, 
+    arr_delay = ArrDelay, 
+    distance = Distance, 
+    carrier = UniqueCarrier
+  )
+```
+
+
+```{r}
+ontime_dep_delay_lazy %>%
+  group_by(x = !! db_bin(arr_delay)) %>%
+  tally()
+```
+
+```{r}
+df <- ontime_dep_delay_lazy %>%
+  select(arr_delay) %>% 
+  filter(!is.na(arr_delay)) %>%
+  filter(arr_delay < 100 , arr_delay > -50) %>%
+  group_by(x = !! db_bin(arr_delay, bins = 20)) %>%
+  tally() %>%
+  collect() 
+
+df %>%
+  ggplot() +
+  geom_col(aes(x = x, y = n, fill = n))
+```
+
+
