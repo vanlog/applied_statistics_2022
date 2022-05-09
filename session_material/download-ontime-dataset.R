@@ -28,7 +28,7 @@ for (i in seq_along(flight_url)) {
   url <- flight_url[[i]] 
   download.file(url, destfile = file_path)
   flight_files[file_name] <- file_path
-  Sys.sleep(5)
+  Sys.sleep(10)
 }
 
 df <- readr::read_csv(flight_files[1])

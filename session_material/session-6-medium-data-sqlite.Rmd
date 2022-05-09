@@ -5,14 +5,16 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+
 library(tidyverse)
 library(DBI)
 library(RSQLite)
 library(dbplot)
+
 ontime_dir <- "~/data/ontime"
 flight_dir <- "~/data/ontime/flight"
 path <- "~/data/ontime"    # '.' is the current folder
-db <- "ontime.sqlite"
+db <- "ontime.sqlite"      # database name
 path_db <- file.path(path, db)
 ```
 
@@ -23,14 +25,17 @@ path_db <- file.path(path, db)
 - [Use dplyr with databases](https://db.rstudio.com/r-packages/dplyr/)
 - [Visualisation and databases](https://db.rstudio.com/best-practices/visualization/)
 - [RSQLite](https://github.com/r-dbi/RSQLite)
+- [RSQlite limits](https://www.sqlite.org/limits.html)
 - [SQLite browser](https://sqlitebrowser.org/dl/)
 - [dbplot vignette](https://rstudio-pubs-static.s3.amazonaws.com/314409_a8af4ecde2a34321a9b6a3a75143f5c8.html)
+
 
 ## SQLite
 
 
 ```{r}
-ontime_files <- list.files(ontime_dir, pattern = ".csv", full.names = TRUE)
+ontime_files <- list.files(flight_dir, pattern = ".csv.bz2", full.names = TRUE)
+ontime_files
 ```
 
 
@@ -42,7 +47,7 @@ delete_db_if_exists <- function(path, db) {
   db_exists <- list.files(path, pattern = db)
   if(length(db_exists) != 0) system(paste("rm", path_db))
 }
-# delete_db_if_exists(path, db)
+delete_db_if_exists(path, db)
 
 # it create the db if it does not exists
 con <- dbConnect(RSQLite::SQLite(), path_db)
@@ -59,13 +64,13 @@ files
 
 ```{r}
 # Try with 100 rows
-max_rows_to_be_read <- 100
+# max_rows_to_be_read <- 100
 # When you are sure use them all, uncomment this line:
 max_rows_to_be_read <- Inf
 
 for (i in seq_along(files)) {
   append <- ifelse(i == 1, FALSE, TRUE)  # first time create the table, then append to the existing one
-  overwrite <- ifelse(i != 1, FALSE, TRUE)
+  overwrite <- ifelse(i == 1, TRUE, FALSE)
   this_file <- files[i]                  # work on the i-th file
   df <- read_delim(
     file = this_file, 
@@ -145,7 +150,6 @@ show_query(ontime_stat)
 ```{r}
 ontime_dep_delay <- ontime %>%
   select(year = Year, dep_delay = DepDelay, arr_delay = ArrDelay) %>%
-  # filter(dep_delay > 0) %>%
   collect()
 ```
 
@@ -168,7 +172,7 @@ class(ontime_dep_delay)
 
 ```{r}
 pl <- ontime_dep_delay %>% 
-  head(n=5000) %>% 
+  head(n=10000) %>% 
   ggplot(aes(dep_delay, arr_delay)) + 
   geom_point(
     alpha=0.1
@@ -284,6 +288,8 @@ dbplot_bar(ontime_dep_delay_lazy, as.character(year), mean(dep_delay)) +
 
 
 ```{r}
+library(dbplot)
+
 ontime_dep_delay_lazy <- ontime %>%
   select(
     year = Year, 
@@ -296,9 +302,11 @@ ontime_dep_delay_lazy <- ontime %>%
 
 
 ```{r}
-ontime_dep_delay_lazy %>%
+bin_df <- ontime_dep_delay_lazy %>%
   group_by(x = !! db_bin(arr_delay)) %>%
-  tally()
+  tally() %>% 
+  collect()
+bin_df
 ```
 
 ```{r}
@@ -313,6 +321,22 @@ df <- ontime_dep_delay_lazy %>%
 df %>%
   ggplot() +
   geom_col(aes(x = x, y = n, fill = n))
+```
+
+
+## Limits
+
+
+```{r}
+my_mean <- function(x) {
+  sum(x)/length(x)
+}
+my_mean(1:3)
+
+ontime %>% 
+  summarise(
+    mean_arr_delay = mean(ArrDelay)
+  )
 ```
 
 
