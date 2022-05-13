@@ -1,0 +1,31 @@
+---
+title: "SQL Language Further readings"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Relational Database Management Systems (RDBMSs)
+
+## SQLite
+
+    *SQLite* is probably the most widely deployed RDBMS as it has become the favorite database engine commonly used in web browsers or distributed by default as part of several operating systems (for example Mac OS X, or Windows 10). SQLite, which first appeared in 2000, owes its popularity and good reputation to its simplicity of configuration and the fact that it can be easily linked to proprietary applications, for example web browsers. SQLite connects well to other programming languages (for example R) making it a good choice as an embedded database in multi-platform applications. As SQLite is now shipped with popular operating systems, we will use it as a data source for our first tutorial later in this chapter. Even if you don't work on Windows 10 or Mac OS X for which SQLite comes pre-installed, you can download SQLite installation files and quickly install them on your machine. We will then create a new database in SQLite and connect it with a locally run RStudio, which will be used to query and process the data stored in a SQLite database.
+    
+## Structured Query Language (SQL)
+
+    Most Relational Database Management Systems use Structured Query Language (SQL) for data management, processing, and querying. Although publicly released for the first time in the mid-1980s, SQL is still very popular amongst database engineers, computer scientists, and everyone else who interacts with data on a daily basis. In fact, according to many modern data analysts, a mixture of good skills in R, Python, and SQL can give you a pretty successful career in the data analytics industry. Add to this some Java, Scala, and a bit of the C family of languages, and you can quickly become an expert in the Big Data world.
+
+    The best thing about SQL is that it is quite easy to learn and understand, even by a person without any knowledge of SQL, as its elements are largely inspired by words used in standard, natural English, and its structure is easily interpretable. SQL is built of several components, which can be arranged into queries or larger statements. It also includes operators well-known from other programming languages, such as equal to, greater than, and so on.
+
+## Resources
+
+    http://beginner-sql-tutorial.com/sql.htm
+
+    http://www.tutorialspoint.com/sql/index.htm
+
+    http://www.w3schools.com/sql/
+    
+    "Big Data Analytics with R": some text is quoted from this book.
+    

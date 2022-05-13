@@ -9,6 +9,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Reference
 
+- [Sparklyr](https://spark.rstudio.com/)
 - [Mastering Spark with R](https://therinspark.com/) *Javier Luraschi, Kevin Kuo, Edgar Ruiz*
 - [SparkR](https://spark.apache.org/docs/latest/sparkr.html)
 
